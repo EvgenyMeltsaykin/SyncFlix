@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScreenGeneratorConfiguration">
+    <option name="settings">
+      <Settings>
+        <option name="categories">
+          <list>
+            <Category>
+              <option name="id" value="1" />
+              <option name="name" value="MVI-Api-Decompose-Feature" />
+            </Category>
+          </list>
+        </option>
+        <option name="screenElements">
+          <list>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="State" />
+              <option name="subdirectory" value="state" />
+              <option name="template" value="package %packageName%.api.state&#10;&#10;import com.movies.syncflix.common.coremvi.state.MviState&#10;&#10;class %screenName%State(&#10;    &#10;) : MviState {&#10;&#10;    companion object {&#10;        fun initial(): %screenName%State {&#10;            return %screenName%State()&#10;        }&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Component" />
+              <option name="subdirectory" value="api" />
+              <option name="template" value="package %packageName%.api&#10;&#10;import %packageName%.api.state.%screenName%State&#10;import kotlinx.coroutines.flow.StateFlow&#10;&#10;interface %screenName%Component {&#10;    val state: StateFlow&lt;%screenName%State&gt;&#10;&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Dependencies" />
+              <option name="subdirectory" value="api" />
+              <option name="template" value="package %packageName%.api&#10;&#10;internal class %screenName%%screenElement%()&#10;        " />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="Default%screenName%%screenElement%" />
+              <option name="name" value="Component" />
+              <option name="subdirectory" value="api" />
+              <option name="template" value="package %packageName%.api&#10;&#10;import com.arkivanov.decompose.ComponentContext&#10;import com.arkivanov.essenty.instancekeeper.getOrCreate&#10;import com.movies.syncflix.common.coreKoin.ComponentKoinContext&#10;import %packageName%.api.state.%screenName%State&#10;import %packageName%.internal.%screenName%Store&#10;import %packageName%.internal.di.%screenName%Module&#10;import kotlinx.coroutines.flow.StateFlow&#10;import org.koin.core.parameter.parametersOf&#10;import org.koin.dsl.module&#10;&#10;internal class Default%screenName%Component(&#10;    componentContext: ComponentContext,&#10;    private val dependencies: %screenName%Dependencies,&#10;) : %screenName%Component, ComponentContext by componentContext {&#10;&#10;    private val koinContext = instanceKeeper.getOrCreate { ComponentKoinContext() }&#10;    private val scope = koinContext.getOrCreateKoinScope(&#10;        listOf(&#10;            %screenName%Module,&#10;            module {&#10;            }&#10;        )&#10;    )&#10;&#10;    private val store = instanceKeeper.getOrCreate {&#10;        scope.get&lt;%screenName%Store&gt;(parameters = {&#10;            parametersOf(&#10;                %screenName%State.initial()&#10;            )&#10;        })&#10;    }&#10;&#10;    init {&#10;        store.registryLifecycle(lifecycle, stateKeeper)&#10;    }&#10;&#10;    override val state: StateFlow&lt;%screenName%State&gt; = store.observeState()&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Action" />
+              <option name="subdirectory" value="internal" />
+              <option name="template" value="package %packageName%.internal&#10;&#10;import com.movies.syncflix.common.coremvi.actions.Action&#10;import com.movies.syncflix.common.coremvi.actions.AsyncAction&#10;import com.movies.syncflix.common.coremvi.actions.MviLifecycleAction&#10;import com.movies.syncflix.common.coremvi.lifecycle.LifecycleState&#10;&#10;internal sealed class %screenName%Action : Action {&#10;&#10;    data class LifecycleAction(override val lifecycleState: LifecycleState) : %screenName%Action(), MviLifecycleAction&#10;&#10;    sealed class Input : %screenName%Action() {&#10;&#10;    }&#10;&#10;    sealed class Async : %screenName%Action(), AsyncAction {&#10;        data class ProxyLifecycleAction(override val lifecycleState: LifecycleState) : Async(), MviLifecycleAction&#10;&#10;        sealed class AsyncInput : Async() {&#10;&#10;        }&#10;&#10;        sealed class AsyncRequests : Async() {&#10;&#10;        }&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="AsyncHandler" />
+              <option name="subdirectory" value="internal" />
+              <option name="template" value="package %packageName%.internal&#10;&#10;import com.movies.syncflix.common.coremvi.asyncHandler.MviAsyncHandler&#10;import com.movies.syncflix.common.coremvi.lifecycle.LifecycleAsyncHandler&#10;import com.movies.syncflix.common.coremvi.lifecycle.LifecycleState&#10;import kotlinx.coroutines.flow.Flow&#10;&#10;internal class %screenName%AsyncHandler(&#10;&#10;) : MviAsyncHandler&lt;%screenName%Action.Async, %screenName%Action&gt;(),&#10;    LifecycleAsyncHandler&lt;%screenName%Action.Async, %screenName%Action&gt; {&#10;&#10;    override suspend fun emitLifecycleAction(lifecycleState: LifecycleState) {&#10;        actionStream.emit(%screenName%Action.LifecycleAction(lifecycleState))&#10;    }&#10;&#10;    override fun transform(eventStream: Flow&lt;%screenName%Action.Async&gt;): Flow&lt;%screenName%Action&gt; {&#10;        return eventStream.transformations {&#10;            addAll(&#10;&#10;            )&#10;        }&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Reducer" />
+              <option name="subdirectory" value="internal" />
+              <option name="template" value="package %packageName%.internal&#10;&#10;import com.movies.syncflix.common.coremvi.reducer.Reducer&#10;import %packageName%.api.state.%screenName%State&#10;&#10;internal class %screenName%Reducer() : Reducer&lt;%screenName%State, %screenName%Action.Async, %screenName%Action&gt; {&#10;    override fun reduce(state: %screenName%State, action: %screenName%Action): Pair&lt;%screenName%State, List&lt;%screenName%Action.Async&gt;&gt; {&#10;        return when (action) {&#10;            is %screenName%Action.Async.AsyncInput, is %screenName%Action.Async.ProxyLifecycleAction -&gt; state to listOf()&#10;            is %screenName%Action.LifecycleAction -&gt; handleLifecycleAction(state, action)&#10;        }&#10;    }&#10;&#10;    private fun handleLifecycleAction(state: %screenName%State, action: %screenName%Action.LifecycleAction): Pair&lt;%screenName%State, List&lt;%screenName%Action.Async&gt;&gt; {&#10;        return state to listOf(%screenName%Action.Async.ProxyLifecycleAction(lifecycleState = action.lifecycleState))&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Store" />
+              <option name="subdirectory" value="internal" />
+              <option name="template" value="package %packageName%.internal&#10;&#10;import com.movies.syncflix.common.coremvi.dsl.DslFlowAsyncHandler&#10;import com.movies.syncflix.common.coremvi.lifecycle.DefaultLifecycleStore&#10;import com.movies.syncflix.common.coremvi.lifecycle.LifecycleStore&#10;import com.movies.syncflix.common.coremvi.reducer.Reducer&#10;import com.movies.syncflix.common.coremvi.store.MviStatefulStore&#10;import %packageName%.api.state.%screenName%State&#10;&#10;internal class %screenName%Store(&#10;    override val asyncHandler: DslFlowAsyncHandler&lt;%screenName%Action.Async, %screenName%Action&gt;,&#10;    override val reducer: Reducer&lt;%screenName%State, %screenName%Action.Async, %screenName%Action&gt;,&#10;    initialState: %screenName%State&#10;) : MviStatefulStore&lt;%screenName%Action, %screenName%Action.Async, %screenName%State&gt;(initialState),&#10;    LifecycleStore&lt;%screenName%Action, %screenName%Action.Async&gt; by DefaultLifecycleStore(asyncHandler) {&#10;&#10;    init {&#10;        bind()&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="categoryId" value="1" />
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Module" />
+              <option name="subdirectory" value="di" />
+              <option name="template" value="package %packageName%.internal.di&#10;&#10;import com.movies.syncflix.common.coremvi.dsl.DslFlowAsyncHandler&#10;import com.movies.syncflix.common.coremvi.reducer.Reducer&#10;import %packageName%.api.state.%screenName%State&#10;import %packageName%.internal.%screenName%Action&#10;import %packageName%.internal.%screenName%AsyncHandler&#10;import %packageName%.internal.%screenName%Reducer&#10;import %packageName%.internal.%screenName%Store&#10;import org.koin.dsl.module&#10;&#10;internal val %screenName%Module = module {&#10;    factory&lt;Reducer&lt;%screenName%State, %screenName%Action.Async, %screenName%Action&gt;&gt; { %screenName%Reducer() }&#10;    factory&lt;DslFlowAsyncHandler&lt;%screenName%Action.Async, %screenName%Action&gt;&gt; { %screenName%AsyncHandler() }&#10;    factory { initialState -&gt; %screenName%Store(get(), get(), initialState.get()) }&#10;}" />
+            </ScreenElement>
+          </list>
+        </option>
+      </Settings>
+    </option>
+  </component>
+</project>

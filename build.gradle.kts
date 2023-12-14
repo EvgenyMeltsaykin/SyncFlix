@@ -1,7 +1,11 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("com.android.application") version "8.1.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.10" apply false
-    kotlin("plugin.serialization").version("1.9.10").apply(false)
+    id("com.android.application") version libs.versions.androidGradlePlugin apply false
+    id("com.android.library") version libs.versions.androidGradlePlugin apply false
+    id("org.jetbrains.kotlin.android") version libs.versions.kotlin apply false
+    kotlin("plugin.serialization") version libs.versions.kotlin apply false
+}
 
+tasks.register("clean", Delete::class) {
+    delete(rootProject.buildDir)
 }

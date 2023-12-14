@@ -1,0 +1,3 @@
+package com.movies.syncflix.common.coremvi.sideEffectDispatcher
+
+interface SideEffectAction
